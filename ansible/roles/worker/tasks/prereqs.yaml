@@ -65,3 +65,17 @@
     state: present
     reload: true
 
+- name: Download and Unarchive a CNI file 
+  ansible.builtin.unarchive:
+    src: https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-{{ cni_plugins_version }}.tgz
+    dest: /opt/cni/bin/
+    remote_src: yes
+
+- name: Add the br_netfilter module , fixes headaches with accessing services from pods
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+    persistent: present
+ 
+
+

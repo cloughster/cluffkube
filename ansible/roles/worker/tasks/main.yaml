@@ -2,13 +2,9 @@
   include_tasks:
        file: prereqs.yaml
 
-- name: Include CNI  tasks
+- name: Include CNI Unix Bridge  tasks
   include_tasks:
-       file: cni.yaml
-
-- name: Include Debian Netplan Roputes  tasks
-  include_tasks:
-       file: debian_static_routes.yaml
+       file: cni-unix-bridge.yaml
 
 - name: Include Container  tasks
   include_tasks:
