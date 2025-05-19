@@ -2,9 +2,9 @@
   include_tasks:
        file: prereqs.yaml
 
-- name: Include CNI Unix Bridge  tasks
-  include_tasks:
-       file: cni-unix-bridge.yaml
+#- name: Include CNI Unix Bridge  tasks
+#  include_tasks:
+#       file: cni-unix-bridge.yaml
 
 - name: Include Container  tasks
   include_tasks:
