@@ -1,0 +1,17 @@
+- name: Create encrypyion Key
+  shell: >-
+    set -o errexit; \
+    set -o pipefail; \
+    head -c 32 /dev/urandom | base64
+  args:
+    executable: "/bin/bash"
+  register: encrypt_key_out
+
+- name: Create encryption-config.yaml
+  ansible.builtin.template:
+    src: "encryption-config.yaml.j2"
+    dest: "{{ cert_conf }}/encryption-config.yaml"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}":wq
+#

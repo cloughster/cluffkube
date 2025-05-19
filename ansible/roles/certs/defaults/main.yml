@@ -1,0 +1,15 @@
+cert_expiry: "87600h"
+
+
+#KUBERNETES_PUBLIC_ADDRESS=192.168.100.30 # haproxy ip address
+
+
+KUBERNETES_CERT_CNAMES: 
+   - 10.32.0.1
+   - 127.0.0.1
+   - kubernetes
+   - kubernetes.default
+   - kubernetes.default.svc
+   - kubernetes.default.svc.cluster
+   - kubernetes.svc.cluster.local
+   - localhost

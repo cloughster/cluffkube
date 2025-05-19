@@ -1,0 +1,80 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+    config.ssh.insert_key = false
+
+
+    config.vm.define "haproxy-lb" do |node|
+      node.vm.hostname = "haproxy-lb"
+      node.vm.box = "generic/rocky8"
+      node.vm.network "private_network", ip: "192.168.100.30"
+      node.vm.provider "vmware-desktop" do |vb|
+        vb.gui = true
+        vb.name = "haproxy-lb"
+        vb.cpus = 1
+        vb.memory = 512
+      end
+     node.vm.provision "file", source: "#{Dir.home}/.vagrant.d/insecure_private_key", destination: "/home/vagrant/yy"
+     node.vm.provision "shell" do |s|
+     s.inline = <<-SHELL
+      chmod 400 /home/vagrant/yy
+      sudo mv /home/vagrant/yy /home/vagrant/.ssh/id_rsa
+     SHELL
+     end
+
+     node.vm.provision "shell", path: "scripts/update_hosts.sh"
+    end
+
+     (0..2).each do |i|
+       config.vm.define "controller-#{i}" do |node|
+         node.vm.hostname = "controller-#{i}"
+         node.vm.box = "hashicorp/bionic64"
+         node.vm.network "private_network", ip: "192.168.100.1#{i}"
+         node.vm.provider "vmware-desktop" do |vb|
+         vb.gui = true
+           vb.name = "controller-#{i}"
+           vb.cpus = 1
+           vb.memory = 1024
+         end
+        node.vm.provision "file", source: "#{Dir.home}/.vagrant.d/insecure_private_key", destination: "/home/vagrant/yy"
+         node.vm.provision "shell" do |s|
+         s.inline = <<-SHELL
+#           cat /etc/hosts | grep -q haproxy-lbj || sudo echo 192.168.100.30 haproxy-lb >> /etc/hosts
+           chmod 400 /home/vagrant/yy
+           sudo mv /home/vagrant/yy /home/vagrant/.ssh/id_rsa
+         SHELL
+         end
+
+         node.vm.provision "shell", path: "scripts/update_hosts.sh"
+
+       end
+     end
+
+    (0..2).each do |i|
+      config.vm.define "worker-#{i}" do |node|
+        node.vm.hostname = "worker-#{i}"
+        node.vm.box = "hashicorp/bionic64"
+        node.vm.network "private_network", ip: "192.168.100.2#{i}"
+        node.vm.provider "vmware-desktop" do |vb|
+        node.vm.provision "shell", path: "./scripts/update-ubuntu.sh"
+          vb.name = "worker-#{i}"
+          vb.cpus = 1
+          vb.memory = 512
+        end
+        node.vm.provision "file", source: "#{Dir.home}/.vagrant.d/insecure_private_key", destination: "/home/vagrant/yy"
+         node.vm.provision "shell" do |s|
+         s.inline = <<-SHELL
+           chmod 400 /home/vagrant/yy
+           sudo mv /home/vagrant/yy /home/vagrant/.ssh/id_rsa
+         SHELL
+
+         node.vm.provision "shell", path: "scripts/update_hosts.sh"
+         end
+      end
+    end
+
+
+  end
+

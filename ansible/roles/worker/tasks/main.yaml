@@ -1,0 +1,25 @@
+- name: Include Worker Node Pre-req tasks
+  include_tasks:
+       file: prereqs.yaml
+
+- name: Include CNI  tasks
+  include_tasks:
+       file: cni.yaml
+
+- name: Include Debian Netplan Roputes  tasks
+  include_tasks:
+       file: debian_static_routes.yaml
+
+- name: Include Container  tasks
+  include_tasks:
+       file: container.yaml
+
+- name: Include Kubelet tasks
+  include_tasks:
+       file: kubelet.yaml
+
+- name: Include Kube-proxy tasks
+  include_tasks:
+       file: kube-proxy.yaml
+
+       

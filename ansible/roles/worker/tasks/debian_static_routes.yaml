@@ -1,0 +1,17 @@
+- name: Add POD CIDR routes to Vagrant Created netplan file
+  ansible.builtin.template:
+    src: "50-vagrant.yaml.j2"
+    dest: "/etc/netplan/50-vagrant.yaml"
+    backup: yes
+  register: netplan_route
+
+- name: Apply debian netplan, if we have updated the config file
+  ansible.builtin.shell: >
+     set -o errexit; \
+     set -o pipefail; \
+     netplan apply
+  args:
+    executable: "/bin/bash"
+  when: netplan_route.changed
+
+

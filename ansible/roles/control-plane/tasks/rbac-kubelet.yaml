@@ -1,0 +1,7 @@
+- name: Set RBAC to applow apiserver access to the Kubelet
+  include_role:
+     name: run_kubectl
+  vars:
+     yamlfile: "rbac-kube-apiserver-to-kubelet.yaml"
+
+

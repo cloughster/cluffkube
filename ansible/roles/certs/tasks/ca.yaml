@@ -1,0 +1,32 @@
+
+
+- name: Create Certifcate  configuration file
+  ansible.builtin.template:
+    src: "ca-config.json.j2"
+    dest: "{{ cert_conf }}/ca-config.json"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Create Kubernetes CA configuration file
+  ansible.builtin.template:
+    src: "ca-csr.json.j2"
+    dest: "{{ cert_conf }}/ca-csr.json"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Create CA and private key
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    /usr/local/bin/cfssl gencert \
+      -initca ca-csr.json \
+      | /usr/local/bin/cfssljson -bare ca
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ cert_conf }}"
+    creates: "ca-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd

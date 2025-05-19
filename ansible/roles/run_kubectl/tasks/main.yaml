@@ -1,0 +1,23 @@
+- name: "Run Kubectl apply against {{ yamlfile }}"
+  block:
+  - name: Copy file to a temp file
+    copy:
+       src: "{{ yamlfile }}"
+       dest: "/tmp/{{ yamlfile }}"
+
+  - name: kubectl apply 
+    shell: kubectl apply -f "{{ yamlfile }}"
+    args:
+      chdir: "/tmp"
+    register: kcmd
+
+  - debug:
+      msg: "{{ kcmd.stdout }}" 
+
+  - name: remove temp file
+    file:
+      path: "/tmp/{{ yamlfile }}"
+      state: absent
+  run_once: true
+
+

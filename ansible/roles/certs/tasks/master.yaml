@@ -1,0 +1,90 @@
+
+- name: Get CNAME list for Kubenetes API cert
+  set_fact:
+      apicname: >-
+       {% set comma = joiner(",") %}{% for item in groups['controllers'] -%}
+          {{ comma() }}{{ hostvars[item].ansible_host }} 
+       {%- endfor %}{{comma()}}{{hostvars['haproxy-lb'].ansible_host}}{% for item in  KUBERNETES_CERT_CNAMES-%}
+         {{ comma() }}{{ item }}
+       {%- endfor %}
+
+- name: Create Kubernetes API server configuration file
+  ansible.builtin.template:
+    src: "kubernetes-csr.json.j2"
+    dest: "{{ cert_conf }}/kubernetes-csr.json"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+
+- name: Create Kubenetes API Key Pair
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    /usr/local/bin/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -hostname={{ apicname }} \ 
+    -profile=kubernetes \
+     kubernetes-csr.json | /usr/local/bin/cfssljson -bare kubernetes
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ cert_conf }}"
+    creates: "kubernetes-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Create Controller Manager Cert configuration file
+  ansible.builtin.template:
+    src: "kube-controller-manager-csr.json.j2"
+    dest: "{{ cert_conf }}/kube-controller-manager-csr.json"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Generate the Controller Manager Key Pair
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    /usr/local/bin/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+     kube-controller-manager-csr.json | /usr/local/bin/cfssljson -bare kube-controller-manager
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ cert_conf }}"
+    creates: "kube-controller-manager-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+- name: Create Scheduler Cert configuration file
+  ansible.builtin.template:
+    src: "kube-scheduler-csr.json.j2"
+    dest: "{{ cert_conf }}/kube-scheduler-csr.json"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Generate the Scheduler Key Pair
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    /usr/local/bin/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+     kube-scheduler-csr.json | /usr/local/bin/cfssljson -bare  kube-scheduler
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ cert_conf }}"
+    creates: "kube-scheduler.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+

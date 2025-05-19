@@ -1,0 +1,46 @@
+- name: Copy Controller Manager Kubeconfig
+  ansible.builtin.copy:
+    src: "{{ cert_conf }}/{{ item }}"
+    dest: "/var/lib/kubernetes/{{ item }}"
+    owner: root
+    group: root
+    mode: '0700'
+  loop:
+    - kube-controller-manager.kubeconfig
+
+- name: Get Controller Manager binaries
+  ansible.builtin.shell: >
+     set -o errexit; \
+     set -o pipefail; \
+     wget -q --https-only --timestamping \
+      "https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kube-controller-manager"
+  args:
+    executable: "/bin/bash"
+    chdir: "/tmp"
+
+- name: Copy the file to a new location
+  ansible.builtin.copy:
+   src: /tmp/kube-controller-manager
+   dest: /usr/local/bin/kube-controller-manager
+   owner: root
+   group: root
+   mode: '0755'
+   remote_src: yes
+
+- name: Create Controller Manager service file
+  ansible.builtin.template:
+    src: "kube-controller-manager.service.j2"
+    dest: "/etc/systemd/system/kube-controller-manager.service"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Configure kube-controller-manager systemctl
+  ansible.builtin.systemd_service:
+    name: kube-controller-manager
+    state: started
+    enabled:  true
+
+- name: systemctl daemon reload
+  ansible.builtin.systemd_service:
+    daemon_reload: true

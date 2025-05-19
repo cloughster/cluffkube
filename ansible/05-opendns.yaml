@@ -1,0 +1,14 @@
+---
+# This playbook prints a simple debug message
+- name: Bootstrap Kube Control Plane
+  hosts: controllers
+  #  connection: local
+  gather_facts: False
+  become: true
+
+  vars:
+     cert_conf: ./cert-conf
+     cert_dir: ./certs
+ 
+  roles:
+    - open_dns

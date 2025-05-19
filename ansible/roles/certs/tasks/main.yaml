@@ -1,0 +1,42 @@
+
+- name: Include Cert Pre-req tasks
+  include_tasks:
+       file: init.yaml
+
+- name: Include Create CA Tasks
+  include_tasks:
+       file: ca.yaml
+
+- name: Include Kubenetes API Cert  Tasks
+  include_tasks:
+       file: master.yaml
+
+
+- name: Include Worker Node Cert  Tasks
+  include_tasks:
+       file: worker.yaml
+
+- name: Include Account  Cert  Tasks
+  include_tasks:
+       file: accounts.yaml
+
+- name: Include Account  Cert  Tasks
+  include_tasks:
+       file: kubeconfigs.yaml
+
+
+- name: Include encryption Config Tasks
+  include_tasks:
+       file: encryption-config.yaml
+
+ 
+- name: Include Worker Kubeconfigs Tasks
+  include_tasks:
+       file: worker_kubeconfigs.yaml 
+
+
+- name: Include admin Kubeconfigs Tasks
+  include_tasks:
+       file: admin_kubeconfig.yaml 
+
+

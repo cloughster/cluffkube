@@ -1,0 +1,29 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=containerd.service
+Requires=containerd.service
+
+[Service]
+ExecStart=/usr/local/bin/kubelet \
+  --anonymous-auth=false \
+  --authorization-mode=Webhook \
+  --client-ca-file=/var/lib/kubernetes/ca.pem \
+  --cluster-dns=10.32.0.10 \
+  --cluster-domain=cluster.local \
+  --container-runtime=remote \
+  --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
+  --image-pull-progress-deadline=2m \
+  --kubeconfig=/var/lib/kubelet/kubeconfig \
+  --network-plugin=cni \
+  --register-node=true \
+  --runtime-request-timeout=25m \
+  --tls-cert-file=/var/lib/kubelet/{{ inventory_hostname }}.pem \
+  --tls-private-key-file=/var/lib/kubelet/{{ inventory_hostname }}-key.pem \
+  --v=2 \
+  --node-ip={{hostvars['haproxy-lb'].ansible_host}}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

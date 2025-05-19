@@ -1,0 +1,179 @@
+---
+# This playbook prints a simple debug message
+- name: Bootstrap Kube Control Plane
+  hosts: controllers
+  #  connection: local
+  gather_facts: False
+  become: true
+
+  vars:
+     cert_conf: ./cert-conf
+     cert_dir: ./certs
+     kube_conf: ./kube-conf
+
+  tasks:
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      owner: root
+      group: root
+      mode: '0760'
+    loop:
+       - /etc/kubernetes/config 
+       - /var/lib/kubernetes
+
+  - name: Copy Certificates 
+    ansible.builtin.copy:
+      src: "{{ cert_conf }}/{{ item }}"
+      dest: "/var/lib/kubernetes/{{ item }}"
+      owner: root
+      group: root
+      mode: '0700'
+    loop:
+      - ca.pem
+      - ca-key.pem
+      - kubernetes.pem
+      - kubernetes-key.pem
+      - service-account-key.pem 
+      - service-account.pem
+
+  - name: Copy  Kubeconfigs
+    ansible.builtin.copy:
+      src: "{{ cert_conf }}/{{ item }}"
+      dest: "/var/lib/kubernetes/{{ item }}"
+      owner: root
+      group: root
+      mode: '0700'
+    loop:
+      - kube-controller-manager.kubeconfig
+      - kube-scheduler.kubeconfig
+
+  - name: Copy Encryption Config 
+    ansible.builtin.copy:
+      src: "{{kube_conf }}/encryption-config.yaml"
+      dest: "/var/lib/kubernetes/encryption-config.yaml"
+      owner: root
+      group: root
+      mode: '0700'
+
+  - name: Get Kubenetes API binaries
+    ansible.builtin.shell: >
+      set -o errexit; \
+      set -o pipefail; \
+      wget -q --https-only --timestamping \
+        "https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kube-apiserver"     
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+
+  - name: Copy the file to a new location
+    ansible.builtin.copy:
+      src: /tmp/kube-apiserver
+      dest: /usr/local/bin/kube-apiserver
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: yes
+
+  - name: Create etcd systemservice file
+    ansible.builtin.template:
+      src: "kube-apiserver.service.j2"
+      dest: "/etc/systemd/system/kube-apiserver.service"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+      #  - name: Configure etcd systemctl
+      #    ansible.builtin.systemd_service:
+      #      name: etcd
+      #      state: started
+      #      enabled:  true
+
+
+  - name: Get Controller Manager binaries
+    ansible.builtin.shell: >
+      set -o errexit; \
+      set -o pipefail; \
+      wget -q --https-only --timestamping \
+       "https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kube-controller-manager" 
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+
+  - name: Copy the file to a new location
+    ansible.builtin.copy:
+      src: /tmp/kube-controller-manager
+      dest: /usr/local/bin/kube-controller-manager
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: yes
+
+  - name: Create COntroller Manager service file
+    ansible.builtin.template:
+      src: "kube-controller-manager.service.j2"
+      dest: "/etc/systemd/system/kube-controller-manager.service"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+      #  - name: Configure etcd systemctl
+      #    ansible.builtin.systemd_service:
+      #      name: etcd
+      #      state: started
+      #      enabled:  true
+
+  - name: Create kube-scheduler.yaml
+    ansible.builtin.template:
+      src: "kube-scheduler.yaml.j2"
+      dest: "/etc/kubernetes/config/kube-scheduler.yaml"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+
+  - name: Get Kube Scheduler binaries
+    ansible.builtin.shell: >
+      set -o errexit; \
+      set -o pipefail; \
+      wget -q --https-only --timestamping \
+       "https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kube-scheduler" 
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+
+  - name: Copy the file to a new location
+    ansible.builtin.copy:
+      src: /tmp/kube-scheduler
+      dest: /usr/local/bin/kube-scheduler
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: yes
+
+  - name: Create Kube Scheduler service file
+    ansible.builtin.template:
+      src: "kube-scheduler.service.j2"
+      dest: "/etc/systemd/system/kube-scheduler.service"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+      #  - name: Configure etcd systemctl
+      #    ansible.builtin.systemd_service:
+      #      name: etcd
+      #      state: started
+      #      enabled:  true
+
+  - name: systemctl daemon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+   
+
+
+
+
+
+      #"https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubectl"

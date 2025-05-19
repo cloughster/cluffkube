@@ -1,0 +1,15 @@
+---
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth1:
+      addresses:
+      - {{ ansible_host }}/24
+      routes:
+{% for item in  groups['workers'] | reject('equalto', inventory_hostname) | list  %}
+      - to: {{ hostvars[item]['host_pod_cidr'] }}
+        via: {{ hostvars[item]['ansible_host'] }}
+{% endfor %}
+
+

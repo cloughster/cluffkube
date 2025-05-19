@@ -1,0 +1,7 @@
+
+
+- name: Create Certificate Directory ( {{ cert-conf }} )
+  ansible.builtin.file:
+    path:  "{{ cert_conf }}"
+    state: directory
+    mode: '0755' 

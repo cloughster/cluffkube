@@ -1,0 +1,29 @@
+---
+# This playbook prints a simple debug message
+- name: Bootstrap ETCD
+  hosts: etcd
+  #  connection: local
+  gather_facts: False
+  become: true
+
+  tasks:
+  - name: Generate the Scheduler Key Pair
+    ansible.builtin.shell: >
+      set -o errexit; \
+      set -o pipefail; \
+      sudo ETCDCTL_API=3 etcdctl member list \
+        --endpoints=https://127.0.0.1:2379 \
+        --cacert=/etc/etcd/ca.pem \
+        --cert=/etc/etcd/kubernetes.pem \
+        --key=/etc/etcd/kubernetes-key.pem
+    args:
+     executable: "/bin/bash"
+    #   creates: "kube-scheduler.pem"
+    run_once: true  
+    register: etcd_output
+
+
+  - name: Result of etcd test
+    debug:
+       msg: "{{ etcd_output.stdout_lines }}"     
+    run_once: true

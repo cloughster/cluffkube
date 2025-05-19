@@ -1,0 +1,54 @@
+- name: Get Kube-proxy binaries
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    wget -q --https-only --timestamping \
+      "https://storage.googleapis.com/kubernetes-release/release/{{ k8s_version }}/bin/linux/amd64/kube-proxy"
+  args:
+    executable: "/bin/bash"
+    chdir: "/tmp"
+
+- name: Copy the kube-proxy to a new location
+  ansible.builtin.copy:
+    src: /tmp/kube-proxy
+    dest: /usr/local/bin/kube-proxy
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+
+- name: Copy Worker Kubeconfig
+  ansible.builtin.copy:
+    src: "{{ cert_conf }}/kube-proxy.kubeconfig"
+    dest: /var/lib/kube-proxy/kubeconfig
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create kube-proxy config file
+  ansible.builtin.template:
+    src: "kube-proxy-config.yaml.j2"
+    dest: "/var/lib/kube-proxy/kube-proxy-config.yaml"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#
+
+- name: Create kube-proxy service file
+  ansible.builtin.template:
+    src: "kube-proxy.service.j2"
+    dest: "/etc/systemd/system/kube-proxy.service"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Configure Kubeproxy systemctl
+  ansible.builtin.systemd_service:
+    name: kube-proxy
+    state: started
+    enabled:  true
+  register: updated_sysctl
+
+- name: systemcyl daemon_reload
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: updated_sysctl.changed

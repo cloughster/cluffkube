@@ -1,0 +1,60 @@
+
+
+- name: Create Admin Client Cert Configuration file
+  ansible.builtin.template:
+    src: "admin-csr.json.j2"
+    dest: "{{ cert_conf }}/admin-csr.json"
+    #    owner: "{{ k8s_ca_certificate_owner }}"
+    #    group: "{{ k8s_ca_certificate_group }}"
+    #    mode: "{{ k8s_ca_file_perm }}"
+
+- name: Create admin Client Key Pair
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    /usr/local/bin/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+     admin-csr.json | /usr/local/bin/cfssljson -bare admin
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ cert_conf }}"
+    creates: "admin-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+
+- name: Create Service Account Cert Configuration file
+  ansible.builtin.template:
+    src: "service-account-csr.json.j2"
+    dest: "{{ cert_conf }}/service-account-csr.json"
+    #    owner: "{{ k8s_ca_certificate_owner }}"
+    #    group: "{{ k8s_ca_certificate_group }}"
+    #    mode: "{{ k8s_ca_file_perm }}"
+
+- name: Create Service Account Key Pair
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    /usr/local/bin/cfssl gencert \
+    -ca=ca.pem \
+    -ca-key=ca-key.pem \
+    -config=ca-config.json \
+    -profile=kubernetes \
+     service-account-csr.json | /usr/local/bin/cfssljson -bare service-account
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ cert_conf }}"
+    creates: "service-account-key.pem"
+  tags:
+    - kubernetes-ca
+    - kubernetes-ca-etcd
+
+
+
+
+
+

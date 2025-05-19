@@ -1,0 +1,67 @@
+- name: Disable SWAP since kubernetes for worker node
+  shell: swapoff -a
+
+- name: Disable SWAP in fstab, to persist over reboots
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+- name: Install socat
+  ansible.builtin.package:
+    name: socat
+    state: present
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0760'
+  loop:
+    - /etc/cni/net.d 
+    - /opt/cni/bin 
+    - /var/lib/kubelet 
+    - /var/lib/kube-proxy 
+    - /var/lib/kubernetes 
+    - /var/run/kubernetes
+
+- name: Copy Certificates
+  ansible.builtin.copy:
+    src: "{{ cert_conf }}/{{ item }}"
+    dest: "/var/lib/kubernetes/{{ item }}"
+    owner: root
+    group: root
+    mode: '0700'
+  loop:
+    - ca.pem
+    - ca-key.pem
+
+- name: Get kubectl binaries
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    wget -q --https-only --timestamping \
+      "https://storage.googleapis.com/kubernetes-release/release/{{ k8s_version }}/bin/linux/amd64/kubectl"
+  args:
+    executable: "/bin/bash"
+    chdir: "/tmp"
+
+- name: Copy the file to a new location
+  ansible.builtin.copy:
+    src: /tmp/kubectl
+    dest: /usr/local/bin/kubectl
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+
+- name: set net.ipv4.ip_forward system variable (/etc/stsctl.conf) 
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+

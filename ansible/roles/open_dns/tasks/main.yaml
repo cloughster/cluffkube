@@ -1,0 +1,7 @@
+- name: Deploy OpenDNS to the cluster
+  include_role:
+     name: run_kubectl
+  vars:
+     yamlfile: "core_dns.yaml"
+
+

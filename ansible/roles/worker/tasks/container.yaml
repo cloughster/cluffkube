@@ -1,0 +1,17 @@
+- name: Install containerd
+  ansible.builtin.package:
+    name: containerd
+    state: present
+
+- name: Configure containerd systemctl
+  ansible.builtin.systemd_service:
+    name: containerd
+    state: started
+    enabled:  true
+  register: updated_sysctl
+
+- name: systemcyl daemon_reload
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: updated_sysctl.changed
+

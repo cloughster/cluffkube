@@ -1,0 +1,82 @@
+
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  ansible.builtin.unarchive:
+    src: https://github.com/etcd-io/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Copy the file to a new location
+  ansible.builtin.copy:
+    src: /tmp/etcd-{{ etcd_version }}-linux-amd64/{{ item }}
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    mode: '0655'
+  loop:
+     - etcd
+     - etcdctl
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0760'
+  loop:
+     - /etc/etcd/
+     - /var/lib/etcd
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: "{{ cert_conf }}/{{ item }}"
+    dest: "/etc/etcd/{{ item }}"
+    owner: root
+    group: root
+    mode: '0700'
+  loop:
+    - ca.pem
+    - kubernetes.pem
+    - kubernetes-key.pem
+
+
+- name: Create etcd systemservice file
+  ansible.builtin.template:
+    src: "etcd.service.j2"
+    dest: "/etc/systemd/system/etcd.service"
+#      owner: "{{ k8s_ca_certificate_owner }}"
+#      group: "{{ k8s_ca_certificate_group }}"
+#      mode: "{{ k8s_ca_file_perm }}"
+
+- name: Configure etcd systemctl
+  ansible.builtin.systemd_service:
+    name: etcd
+    state: started
+    enabled:  true
+
+- name: systemctl daemon reload
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Quick test - check all members have started 
+  ansible.builtin.shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    sudo ETCDCTL_API=3 etcdctl member list \
+      --endpoints=https://127.0.0.1:2379 \
+      --cacert=/etc/etcd/ca.pem \
+      --cert=/etc/etcd/kubernetes.pem \
+      --key=/etc/etcd/kubernetes-key.pem
+  args:
+   executable: "/bin/bash"
+  #   creates: "kube-scheduler.pem"
+  run_once: true
+  register: etcd_output
+  tags: test
+
+
+- name: Result of etcd test
+  debug:
+     msg: "{{ etcd_output.stdout_lines }}"
+  run_once: true
+  tags: test

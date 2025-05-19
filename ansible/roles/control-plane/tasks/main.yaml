@@ -1,0 +1,18 @@
+- name: Include Control Plane Pre-req tasks
+  include_tasks:
+       file: prereqs.yaml
+
+- name: Include Kube-apiserver Tasks
+  include_tasks:
+       file: kube-apiserver.yaml
+
+- name: Include Kube-Controller-Manager Tasks
+  include_tasks:
+       file: kube-controller-manager.yaml
+
+- name: Include Kube-scheduler Tasks
+  include_tasks:
+       file: kube-scheduler.yaml
+
+- name: RBAC
+  include_tasks: rbac-kubelet.yaml

@@ -1,0 +1,15 @@
+---
+# This playbook prints a simple debug message
+- name: Echo
+  hosts: haproxy-lb
+  connection: local
+  gather_facts: False
+  become: true
+
+
+  tasks:
+  - name: xxx
+    template: 
+      src: "haproxy.conf.j2"
+      dest: "/tmp/test-haproxy.conf" 
+
