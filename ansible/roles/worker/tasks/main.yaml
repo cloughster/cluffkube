@@ -14,8 +14,8 @@
   include_tasks:
        file: kubelet.yaml
 
-- name: Include Kube-proxy tasks
-  include_tasks:
-       file: kube-proxy.yaml
+       #- name: Include Kube-proxy tasks
+       #  include_tasks:
+       #       file: kube-proxy.yaml
 
        

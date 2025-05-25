@@ -9,6 +9,15 @@
      - /etc/kubernetes/config
      - /var/lib/kubernetes
      - ~root/.kube
+     - ~vagrant/.kube
+
+- name: Create a vagramt/.kube  directory
+  ansible.builtin.file:
+    path: "~vagrant/.kube"
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0760'
 
 - name: Copy Certificates
   ansible.builtin.copy:
@@ -28,7 +37,7 @@
 - name: Copy Admin Kubeconfig
   ansible.builtin.copy:
     src: "{{ cert_conf }}/admin.kubeconfig"
-    dest: "~vagrant/admin.kubeconfig"
+    dest: "~vagrant/.kube/config"
     owner: vagrant
     group: vagrant
     mode: '0740'
@@ -46,7 +55,7 @@
      set -o errexit; \
      set -o pipefail; \
      wget -q --https-only --timestamping \
-      "https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubectl"
+      "https://storage.googleapis.com/kubernetes-release/release/{{ k8s_version }}/bin/linux/amd64/kubectl"
   args:
     executable: "/bin/bash"
     chdir: "/tmp"

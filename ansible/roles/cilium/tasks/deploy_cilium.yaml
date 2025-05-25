@@ -1,0 +1,19 @@
+- name: Check if cilium is running
+  shell: /usr/local/bin/cilium version | grep running | grep -q unknown
+  register: cilium_cli
+  ignore_errors: true
+  no_log: true
+
+    
+- name: Deploy Cilium to the cluster
+  block:
+    - name: Create KubeProxy Configuration file
+      ansible.builtin.template:
+        src: "helm-custom.j2"
+        dest: "/tmp/helm-custom"
+
+    - name: Install Cilium 
+      shell: "/usr/local/bin/cilium install --version {{ cilium_version }} --namespace kube-system --values /tmp/helm-custom --wait"
+  when: cilium_cli.failed == false
+  run_once: true
+

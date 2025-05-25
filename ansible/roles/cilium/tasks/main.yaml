@@ -1,0 +1,9 @@
+- name: Include Cilium CLI Pre-req tasks
+  include_tasks:
+       file: install_cilium_cli.yaml
+       
+- name: Deploy cilium to the cluster Pre-req tasks
+  include_tasks:
+       file: deploy_cilium.yaml
+       
+

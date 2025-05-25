@@ -1,0 +1,9 @@
+---
+- name: Install Cilium using helm
+  hosts: controllers
+  #  connection: local
+  gather_facts: False
+  become: true
+
+  roles:
+    - cilium
