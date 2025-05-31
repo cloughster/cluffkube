@@ -6,9 +6,5 @@
   gather_facts: False
   become: true
 
-  vars:
-     cert_conf: ./cert-conf
-     cert_dir: ./certs
- 
   roles:
     - etcd
