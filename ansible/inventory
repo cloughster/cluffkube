@@ -31,4 +31,4 @@ cilium_version="1.17.2"
 
 POD_CIDR="10.200.0.0/16"
 
-cert_conf=cert_conf_1
+cert_conf=cert-conf-1
