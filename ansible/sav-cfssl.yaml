@@ -1,0 +1,22 @@
+---
+# This playbook prints a simple debug message
+- name: Echo
+  hosts: haproxy-lb
+  connection: local
+  gather_facts: False
+  #  become: true
+
+  tasks:
+  - name: Create admin Client Key Pair
+    ansible.builtin.shell: >
+      set -o errexit; \
+      set -o pipefail; \
+      VERSION=$(curl --silent "https://api.github.com/repos/cloudflare/cfssl/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/') \
+      VNUMBER=${VERSION#"v"} \
+      wget https://github.com/cloudflare/cfssl/releases/download/${VERSION}/cfssl_${VNUMBER}_linux_amd64 -O cfssl \
+      chmod 755 cfssl \
+      sudo mv cfssl /usr/local/bin
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+      creates: "/usr/local/bin/cfssl" 

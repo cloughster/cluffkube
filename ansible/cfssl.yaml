@@ -1,0 +1,45 @@
+---
+# This playbook prints a simple debug message
+- name: Echo
+  hosts: haproxy-lb
+  connection: local
+  gather_facts: False
+  become: true
+
+  tasks:
+  - name: Gte latest version of cfssl
+    ansible.builtin.shell: >
+      curl --silent "https://api.github.com/repos/cloudflare/cfssl/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' 
+    register: cfsslversionout
+
+  - name: set version fact
+    set_fact:
+      vnumber: "{{ cfsslversionout.stdout[1:] }}"
+      version: "{{ cfsslversionout.stdout }}"
+
+  - name: Get latest version of cfssl
+    ansible.builtin.shell: >
+      wget https://github.com/cloudflare/cfssl/releases/download/{{ version }}/cfssl_{{ vnumber }}_linux_amd64 -O cfssl
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+
+  - name: Get latest version of cfssljson
+    ansible.builtin.shell: >
+      wget https://github.com/cloudflare/cfssl/releases/download/{{ version }}/cfssljson_{{ vnumber }}_linux_amd64 -O cfssljson
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+
+
+  - name: Copy file with owner and permissions
+    ansible.builtin.copy:
+      src: "/tmp/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      owner: root
+      group: root
+      mode: '0755'
+    loop:
+    - cfssl
+    - cfssljson
+

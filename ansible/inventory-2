@@ -1,0 +1,31 @@
+[haproxy]
+haproxy-lb ansible_host=192.168.100.11
+
+[controllers]
+controller-1 ansible_host=192.168.100.11
+
+[etcd]
+controller-0 ansible_host=192.168.100.10
+#controller-1 ansible_host=192.168.100.11
+#controller-2 ansible_host=192.168.100.12
+
+[workers]
+worker-3 ansible_host=192.168.100.40 host_pod_cidr=10.200.1.0/24
+worker-4 ansible_host=192.168.100.41 host_pod_cidr=10.200.2.0/24
+
+[all:vars]
+#k8s_version="v1.20.2"
+k8s_version="v1.24.2"
+etcd_version="v3.4.14"
+cfssl_version="1.5.0"
+crio_version="v1.19.1"
+conmon_version="v2.0.25"
+cni_plugins_version="v0.9.1"
+
+
+cilium_version="1.17.2"
+
+
+POD_CIDR="10.200.0.0/16"
+
+cert_conf=cert-conf-1
