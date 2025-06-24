@@ -12,6 +12,7 @@
     owner: root
     group: root
     mode: '0655'
+    remote_src: true
   loop:
      - etcd
      - etcdctl

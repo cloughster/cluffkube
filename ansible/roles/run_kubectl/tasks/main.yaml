@@ -3,10 +3,10 @@
   - name: Copy file to a temp file
     copy:
        src: "{{ yamlfile }}"
-       dest: "/tmp/{{ yamlfile }}"
+       dest: "/tmp/{{ yamlfile | basename }}"
 
   - name: kubectl apply 
-    shell: kubectl apply -f "{{ yamlfile }}"
+    shell: kubectl apply -f "/tmp/{{ yamlfile | basename }}"
     args:
       chdir: "/tmp"
     register: kcmd

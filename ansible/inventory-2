@@ -5,8 +5,8 @@ haproxy-lb ansible_host=192.168.100.11
 controller-1 ansible_host=192.168.100.11
 
 [etcd]
-controller-0 ansible_host=192.168.100.10
-#controller-1 ansible_host=192.168.100.11
+#controller-0 ansible_host=192.168.100.10
+controller-1 ansible_host=192.168.100.11
 #controller-2 ansible_host=192.168.100.12
 
 [workers]
@@ -26,6 +26,9 @@ cni_plugins_version="v0.9.1"
 cilium_version="1.17.2"
 
 
-POD_CIDR="10.201.2.0/16"
+POD_CIDR="10.202.2.0/16"
 
 cert_conf=cert-conf-2
+serviceSubnet=172.20.2.0/24
+kubenetesService=172.20.2.1
+dnsService=172.20.2.10

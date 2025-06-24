@@ -1,0 +1,13 @@
+---
+# This playbook prints a simple debug message
+- name: Echo
+  hosts: haproxy-lb
+  connection: local
+  gather_facts: False
+  become: true
+
+
+  tasks:
+  - name: Disable SELinux
+    debug: 
+      msg: "{{  POD_CIDR | default('10.200.0.0/16') }} === {{ serviceSubnet | default('10.32.0.0/24') }} " 

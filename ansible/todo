@@ -1,0 +1,30 @@
+outstanding
+===========
+
+
+hardcoded kubenetes service in cert default - need to automate this from the service cidr
+
+s the podcir really required to be defined in kube-controller ?
+
+
+Done
+=====
+
+
+In order to have unique service cidrs for clusters this impacted
+
+- dns , as i had hard coded the ip od the DNS service 
+   - updated the open_dns role to use a fact
+   - updated run_kubectl to support templated files
+
+
+- finally got the ability to define the pod CIDR I wanted
+  - created cilium using "--set ipam=kubenetes", which used the valuesfor the cidr defined
+    in the kube-apiserver definitions and kube-controller-manager 
+  - removed cidr definitiosn from kubelet config
+
+
+- I over looked the fact I disabled cilium to function as a kube-proxy and disabled the default kube-proxy
+
+
+

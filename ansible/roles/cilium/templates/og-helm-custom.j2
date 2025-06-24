@@ -1,23 +1,23 @@
-kubeProxyReplacement: "true"
+kubeProxyReplacement: "false"
 
 hubble:
   enabled: true
   relay:
     enabled: true
 
-##ipam:
-##  operator:
+ipam:
+  operator:
 # ipv4NativeRoutingCIDR=
-##    clusterPoolIPv4PodCIDRList: ["{{ POD_CIDR }}"]
-##    clusterPoolIPv4MaskSize: 24
+    clusterPoolIPv4PodCIDRList: ["{{ POD_CIDR }}"]
+    clusterPoolIPv4MaskSize: 24
 
 #bgpControlPlane:
 #  # -- Enables the BGP control plane.
 #  enabled: false
 
 
-##nodePort:
+nodePort:
   # -- Enable the Cilium NodePort service implementation.
-##  enabled: true
+  enabled: true
   # -- Port range to use for NodePort services.
-##  range: "30000,32767"
+  range: "30000,32767"

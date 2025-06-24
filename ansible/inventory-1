@@ -29,6 +29,10 @@ cni_plugins_version="v0.9.1"
 cilium_version="1.17.2"
 
 
-POD_CIDR="10.200.0.0/16"
+POD_CIDR="10.201.0.0/16"
+serviceSubnet=172.20.1.0/24
+kubenetesService=172.20.1.1
+dnsService=172.20.1.10
+
 
 cert_conf=cert-conf-1
