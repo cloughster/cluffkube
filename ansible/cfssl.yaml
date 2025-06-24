@@ -43,3 +43,21 @@
     - cfssl
     - cfssljson
 
+  - name: Get kubectl binaries
+    ansible.builtin.shell: >
+       set -o errexit; \
+       set -o pipefail; \
+       wget -q --https-only --timestamping \
+        "https://storage.googleapis.com/kubernetes-release/release/{{ k8s_version }}/bin/linux/amd64/kubectl"
+    args:
+      executable: "/bin/bash"
+      chdir: "/tmp"
+
+
+  - name: Copy the file to a new location
+    ansible.builtin.copy:
+     src: /tmp/kubectl
+     dest: /usr/local/bin/kubectl
+     owner: root
+     group: root
+     mode: '0755'

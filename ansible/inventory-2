@@ -26,6 +26,6 @@ cni_plugins_version="v0.9.1"
 cilium_version="1.17.2"
 
 
-POD_CIDR="10.200.0.0/16"
+POD_CIDR="10.201.2.0/16"
 
-cert_conf=cert-conf-1
+cert_conf=cert-conf-2
