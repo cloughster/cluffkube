@@ -6,9 +6,6 @@ hardcoded kubenetes service in cert default - need to automate this from the ser
 
 s the podcir really required to be defined in kube-controller ?
 
-use 'ansible stat' when checking if the clis is deployed
-
-
 Try this all again, when we have worked out how to use mode.ipam = cluster
 
 automate creation of kube admin configs with unique cluster names and creation of a common config

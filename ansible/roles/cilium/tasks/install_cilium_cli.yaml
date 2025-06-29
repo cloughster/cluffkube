@@ -1,8 +1,7 @@
-- name: check if Cilium cli is deployed
-  shell: /usr/local/bin/cilium version --client
-  register: cilium_cli
-  ignore_errors: true
-  no_log: true
+- name: Stat cilium cli file to check if it exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/cilium
+  register: filestat
 
 - name: Deploy cilium cli
   ansible.builtin.shell: 
@@ -19,5 +18,5 @@
   args:
     executable: "/bin/bash"
     chdir: "/tmp"
-  when: cilium_cli.failed
+  when: not filestat.stat.exists
 

@@ -36,3 +36,12 @@ dnsService=172.20.1.10
 
 
 cert_conf=cert-conf-1
+
+
+
+#cilium install --set kubeProxyReplacement=false                 
+#--set ipam.mode=kubernetes                  
+#--set cluster.name=poppy                   
+#--set cluster.id=1 
+#--context poppy                  
+#--set clustermesh.apiserver.service.nodePort=32001
